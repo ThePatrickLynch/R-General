@@ -1,103 +1,73 @@
-Retrieving Text from Twitter
+#Retrieving Text from Twitter
 
 
 #Twitter API requires authentication since March 2013. Please follow instructions in "Section 3 - Authentication with OAuth" in the twitteR vignettes on # CRAN or this link to complete authentication before running the code below.
 
-> library(twitteR)
-> # retrieve the first 100 tweets (or all tweets if fewer than 100)
-> # from the user timeline of @rdatammining
-> rdmTweets <- userTimeline("rdatamining", n=100)
-> n <- length(rdmTweets)
-> rdmTweets[1:3]
-[[1]]
-Text Mining Tutorial http://t.co/jPHHLEGm
-[[2]]
-R cookbook with examples http://t.co/aVtIaSEg
-[[3]]
-Access large amounts of Twitter data for data mining and other tasks within 
-R via the twitteR package. http://t.co/ApbAbnxs
+library(twitteR)
+setup_twitter_oauth("dr83qJt5IfcuqmicXPI9yINlA", "c0bSVElsvFtuHQnlZhnvphup98486t1Qm3BJEezTqIlNfSzvM6","37933003-LSHwa6XzUtCwXnt3HN4nw0cq37Qd8ALtnyTEAYsI3", "hXrLrYqKkzmoqyaZJsfmTI5bO5zv3yPVytR9fMDWVuSpl")
 
+# retrieve the first 100 tweets (or all tweets if fewer than 100)
+# from the user timeline of @rdatammining
 
-Transforming Text
+rdmTweets <- userTimeline("iLearningUK", n=100)
+n <- length(rdmTweets)
 
-The tweets are first converted to a data frame and then to a corpus.
+#Transforming Text
 
-> df <- do.call("rbind", lapply(rdmTweets, as.data.frame))
-> dim(df)
-[1] 79 10
+#The tweets are first converted to a data frame and then to a corpus.
 
-> library(tm)
+df <- do.call("rbind", lapply(rdmTweets, as.data.frame))
+
+library(tm)
 > # build a corpus, which is a collection of text documents
 > # VectorSource specifies that the source is character vectors.
-> myCorpus <- Corpus(VectorSource(df$text))
+myCorpus <- Corpus(VectorSource(df$text))
 
-After that, the corpus needs a couple of transformations, including changing letters to lower case, removing punctuations/numbers and removing stop words. The general English stop-word list is tailored by adding "available" and "via" and removing "r".
+#After that, the corpus needs a couple of transformations, including changing letters to lower case, removing punctuations/numbers and removing stop words. The general English stop-word list is tailored by adding "available" and "via" and removing "r".
 
-> myCorpus <- tm_map(myCorpus, tolower)
-> # remove punctuation
-> myCorpus <- tm_map(myCorpus, removePunctuation)
+myCorpus <- tm_map(myCorpus, tolower)
+# remove punctuation
+myCorpus <- tm_map(myCorpus, removePunctuation)
 > # remove numbers
-> myCorpus <- tm_map(myCorpus, removeNumbers)
+myCorpus <- tm_map(myCorpus, removeNumbers)
 > # remove stopwords
 > # keep "r" by removing it from stopwords
-> myStopwords <- c(stopwords('english'), "available", "via")
-> idx <- which(myStopwords == "r")
-> myStopwords <- myStopwords[-idx]
-> myCorpus <- tm_map(myCorpus, removeWords, myStopwords)
+myStopwords <- c(stopwords('english'), "available", "via")
+idx <- which(myStopwords == "r")
+myStopwords <- myStopwords[-idx]
+myCorpus <- tm_map(myCorpus, removeWords, myStopwords)
 
-Stemming Words
+#Stemming Words
+#In many cases, words need to be stemmed to retrieve their radicals. For instance, "example" and "examples" are both stemmed to "exampl". However, after that, one may want to complete the stems to their original forms, so that the words would look "normal".
 
-In many cases, words need to be stemmed to retrieve their radicals. For instance, "example" and "examples" are both stemmed to "exampl". However, after that, one may want to complete the stems to their original forms, so that the words would look "normal".
+#library(RWeka)
+#library(Snowballc)
 
-> dictCorpus <- myCorpus
-> # stem words in a text document with the snowball stemmers,
-> # which requires packages Snowball, RWeka, rJava, RWekajars
-> myCorpus <- tm_map(myCorpus, stemDocument)
-> # inspect the first three ``documents"
-> inspect(myCorpus[1:3])
-(Some details are removed to make it short. Same applies to inspect() below.)
-[[1]]
-text mine tutori httptcojphhlegm
-[[2]]
-r cookbook exampl httptcoavtiaseg
-[[3]]
-access amount twitter data data mine task r twitter packag httptcoapbabnx
+dictCorpus <- myCorpus
+# stem words in a text document with the snowball stemmers,
+# which requires packages Snowball, RWeka, rJava, RWekajars
+myCorpus <- tm_map(myCorpus, stemDocument)
+# inspect the first three ``documents"
+inspect(myCorpus[1:3])
 
-> # stem completion
-> myCorpus <- tm_map(myCorpus, stemCompletion, dictionary=dictCorpus)
+# stem completion
+myCorpus <- tm_map(myCorpus, stemCompletion, dictionary=dictCorpus)
 
-Print the first three documents in the built corpus.
+# Print the first three documents in the built corpus.
 
-> inspect(myCorpus[1:3])
-[[1]]
-text miners tutorial httptcojphhlegm
-[[2]]
-r cookbook examples httptcoavtiaseg
-[[3]]
-access amounts twitter data data miners task r twitter package httptcoapbabnxs
+inspect(myCorpus[1:3])
 
-Something unexpected in the above stemming and stem completion is that, word "mining" is first stemmed to "mine", and then is completed to "miners", instead of "mining", although there are many instances of "mining" in the tweets, compared to only one instance of "miners".
+#Something unexpected in the above stemming and stem completion is that, word "mining" is first stemmed to "mine", and then is completed to "miners", instead of "mining", although there are many instances of "mining" in the tweets, compared to only one instance of "miners".
+# Building a Document-Term Matrix
 
-Building a Document-Term Matrix
+myDtm <- TermDocumentMatrix(myCorpus, control = list(minWordLength = 1))
+inspect(myDtm[266:270,31:40])
 
-> myDtm <- TermDocumentMatrix(myCorpus, control = list(minWordLength = 1))
-> inspect(myDtm[266:270,31:40])
-A term-document matrix (5 terms, 10 documents)
-Non-/sparse entries: 9/41
-Sparsity : 82%
-Maximal term length: 12
-Weighting : term frequency (tf)
-             Docs
-Terms        31 32 33 34 35 36 37 38 39 40
-r             0  0  1  1  1  0  1  2  1  0
-ramachandran  0  0  0  0  0  0  1  0  0  0
-ranked        0  0  0  1  0  0  0  0  0  0
-rapidminer    0  0  0  0  0  0  0  0  0  0
-rdatamining   0  0  1  0  0  0  0  0  0  0
 
-Based on the above matrix, many data mining tasks can be done, for example, clustering, classification and association analysis.
 
-Frequent Terms and Associations
+#Based on the above matrix, many data mining tasks can be done, for example, clustering, classification and association analysis.
+
+#Frequent Terms and Associations
 
 > findFreqTerms(myDtm, lowfreq=10)
 [1] "analysis" "data" "examples" "miners" "package" "r" "slides"
