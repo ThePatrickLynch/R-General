@@ -96,27 +96,34 @@ meta(doc.corpus[[1]])
 # list of English stop words is not entirely appropriate for Shakespearean 
 # English, but it is a reasonable starting point.
 
-doc.corpus <- tm_map(doc.corpus, tolower)
-doc.corpus <- tm_map(doc.corpus, removePunctuation)
-doc.corpus <- tm_map(doc.corpus, removeNumbers)
+#doc.corpus <- tm_map(doc.corpus, tolower)
+#doc.corpus <- tm_map(doc.corpus, removePunctuation)
+#doc.corpus <- tm_map(doc.corpus, removeNumbers)
+
+# above changes from char structure so below is recommended
+
+doc.corpus <- tm_map(doc.corpus, content_transformer(tolower))
+doc.corpus <- tm_map(doc.corpus, content_transformer(removePunctuation)) # remove punctuation
+doc.corpus <- tm_map(doc.corpus, content_transformer(removeNumbers))
+
 doc.corpus <- tm_map(doc.corpus, removeWords, stopwords("english"))
 
 # apparently tm used to convert tolower etc as text, but it changed so need to make PlainTextDocument
-doc.corpus <- tm_map(doc.corpus, PlainTextDocument)
+#doc.corpus <- tm_map(doc.corpus, PlainTextDocument)
 
 ############
 # I have added some meta data so that the different documents are identified
-# PlainTextDocument killed the metadata
-#
+# 
+# I only needed this when I had to use PlainText
 
-for (n in 1:length(doc.corpus)) {
-  meta(doc.corpus[[n]], tag='creator') <- 'Will Shakespeare'
-  meta(doc.corpus[[n]], tag='heading') <- n
-  meta(doc.corpus[[n]], tag='id') <- n
-  meta(doc.corpus[[n]], tag='description') <- n
-}
+#for (n in 1:length(doc.corpus)) {
+#  meta(doc.corpus[[n]], tag='creator') <- 'Will Shakespeare'
+#  meta(doc.corpus[[n]], tag='heading') <- n
+#  meta(doc.corpus[[n]], tag='id') <- n
+#  meta(doc.corpus[[n]], tag='description') <- n
+#}
 
-meta(doc.corpus[[6]])
+#meta(doc.corpus[[6]])
 
 
 # Next we perform stemming, which removes affixes from words (so, for example,
