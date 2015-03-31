@@ -157,8 +157,16 @@ inspect(DTM[1:10,1:10])
 # of documents and terms in your data.
 
 # Now we can start asking questions like: what are the most frequently occurring terms?
-
 findFreqTerms(TDM, 2000)
+
+
+freqTerms <- rowSums(as.matrix(TDM))
+freqTerms
+freqTerms <- subset(freqTerms, freqTerms>=2000)
+names(freqTerms)
+str(freqTerms)
+
+barplot(freqTerms, las=2)
 
 # Each of these words occurred more that 2000 times.
 # What about associations between words? Let’s have a look at what other words had a high association with “love”.
