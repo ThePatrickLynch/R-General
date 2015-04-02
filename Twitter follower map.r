@@ -12,7 +12,7 @@ rm(list=ls())
 
 library(twitteR)
 setup_twitter_oauth("dr83qJt5IfcuqmicXPI9yINlA", "c0bSVElsvFtuHQnlZhnvphup98486t1Qm3BJEezTqIlNfSzvM6","37933003-LSHwa6XzUtCwXnt3HN4nw0cq37Qd8ALtnyTEAYsI3", "hXrLrYqKkzmoqyaZJsfmTI5bO5zv3yPVytR9fMDWVuSpl")
-
+1
 
 source("http://biostat.jhsph.edu/~jleek/code/twitterMap.R")
 twitterMap("iLearningUK", fileName="twitterMap.pdf", nMax=1500)
